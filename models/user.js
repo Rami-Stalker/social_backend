@@ -23,6 +23,20 @@ const userSchema = mongoose.Schema({
         required: true,
         type: String,
     },
+    bio: {
+        type: String,
+        default: "",
+    },
+    followers: [],
+    following: [],
+    photo: {
+        required: true,
+        type: String,
+    },
+    backgroundImage: {
+        type: String,
+        default: "",
+    },
     phone: {
         type: String,
         default: "",
