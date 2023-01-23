@@ -3,6 +3,12 @@ const express = require("express");
 const mongoose = require("mongoose");
 // IMPORTS FROM OTHER FILES
 const authRouter = require("./routes/auth");
+const postRouter = require("./routes/post");
+const storyRouter = require("./routes/story");
+const userRouter = require("./routes/user");
+const chatRouter = require("./routes/chat");
+
+
 
 // app init
 const PORT = process.env.PORT || 3000;
@@ -13,17 +19,13 @@ const DB =
 // middleware 
 app.use(express.json());
 app.use(authRouter);
+app.use(userRouter);
+app.use(postRouter);
+app.use(storyRouter);
+app.use(chatRouter);
 
-// // Connections
-// mongoose
-//     .connect(DB)
-//     .then(() => {
-//         console.log("Connection Successful");
-//     })
-//     .catch((e) => {
-//         console.log("========ERROR========");
-//     });
 
+// Connections
 async function connect(){
     try {
         await mongoose.connect(DB);

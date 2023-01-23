@@ -11,6 +11,7 @@ const userSchema = mongoose.Schema({
         type: String,
         trim: true,
         validate: {
+            // validator
             validator: (value) => {
                 const re =
                     /^(([^<>()[\]\.,;:\s@\"]+(\.[^<>()[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i;
@@ -27,8 +28,18 @@ const userSchema = mongoose.Schema({
         type: String,
         default: "",
     },
-    followers: [],
-    following: [],
+    followers: [
+        {
+            type: String,
+            default: "",
+        },
+    ],
+    following: [
+        {
+            type: String,
+            default: "",
+        },
+    ],
     photo: {
         required: true,
         type: String,
@@ -52,4 +63,4 @@ const userSchema = mongoose.Schema({
 });
 
 const User = mongoose.model("User", userSchema);
-module.exports = User;
+module.exports = { User, userSchema };

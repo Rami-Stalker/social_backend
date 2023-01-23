@@ -1,5 +1,6 @@
 const express = require("express");
-const User = require("../models/user");
+
+const { User } = require("../models/user");
 const bcryptjs = require("bcryptjs");
 const authRouter = express.Router();
 const jwt = require("jsonwebtoken");
@@ -9,6 +10,8 @@ const auth = require("../middlewares/auth");
 authRouter.post("/api/signup", async (req, res) => {
     try {
         const { name, email, password, photo } = req.body;
+
+        // multer for images
 
         const existingUser = await User.findOne({ email });
         if (existingUser) {
@@ -44,7 +47,8 @@ authRouter.post('/api/signin', async (req, res) => {
         if (!isMatch) {
             return res.status(400).json({ msg: "Incorrect password." });
         }
-        const token = jwt.sign({ id: user._id }, "passwordKey");
+        const token = jwt.sign({ id: user._id }, "passwordKeys");
+
         res.json({ token, ...user._doc });
 
     } catch (e) {
@@ -56,7 +60,7 @@ authRouter.post("/tokenIsValid", async (req, res) => {
     try {
         const token = req.header("x-auth-token");
         if (!token) return res.json(false);
-        const verified = jwt.verify(token, "passwordKey");
+        const verified = jwt.verify(token, "passwordKeys");
         if (!verified) return res.json(false);
 
         const user = await User.findById(verified.id);
@@ -71,6 +75,11 @@ authRouter.post("/tokenIsValid", async (req, res) => {
 authRouter.get("/", auth, async (req, res) => {
     const user = await User.findById(req.user);
     res.json({ ...user._doc, token: req.token });
+});
+
+authRouter.get("/user-by-id", auth, async (req, res) => {
+    const user = await User.findById(req.query.userId);
+    res.json(user);
 });
 
 module.exports = authRouter;
