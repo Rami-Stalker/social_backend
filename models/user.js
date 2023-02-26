@@ -23,10 +23,12 @@ const userSchema = mongoose.Schema({
     password: {
         required: true,
         type: String,
+        max: 50,
     },
     bio: {
         type: String,
         default: "",
+        max: 100,
     },
     followers: [
         {
@@ -59,6 +61,10 @@ const userSchema = mongoose.Schema({
     type: {
         type: String,
         default: "user",
+    },
+    private: {
+        type: Boolean,
+        default: false,
     },
 });
 

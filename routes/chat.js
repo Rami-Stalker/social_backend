@@ -15,50 +15,30 @@ const Chat = require("../models/chat");
 //     }
 // });
 
-chatRouter.post("/message/add-message", auth, async (req, res) => {
+chatRouter.get("/chat/", auth, async (req, res) => {
+        const myChat = await Chat.findOne({ userId: req.user });
+        res.json(myChat);
+});
+
+chatRouter.get("/add-chat", auth, async (req, res) => {
     try {
-        const { recieverId, message, type, repliedMessage, repliedType, repliedTo, repliedIsMe,  isSeen } = req.body;
+        const user = new Chat({
+            userId: req.user,
+        });
+    
+        user = await user.save();
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
 
-        let myChat = await Chat.findOne({userId : req.user});
-        let recieverChat = await Chat.findOne({userId : recieverId});
-
-        if (!myChat) {
-
-            let contents = [];
-            let messages = [];
-
-            const msg = {
-                message,
-                type,
-            };
-
-            const repliedMsg = {
-                repliedMessage,
-                type: repliedType,
-                repliedTo,
-                isMe: repliedIsMe,
-                
-            };
-
-            messages.push({
-                senderId: req.user,
-                recieverId,
-                msg,
-                repliedMsg,
-                isSeen,
-            });
-
-            contents.push({ userId: recieverId, messages: messages });
-
-            let user = new Chat({
-                userId: req.user,
-                contents,
-            });
-            
-            user = await user.save();
-        }
-
-        const senderContent = myChat.contents.find(o => o.userId === recieverId);
+const newChat = ( async (senderId, recieverId, message, type, repliedMessage, repliedType, repliedTo, repliedIsMe) => {
+//chatRouter.post("/message/add-message", auth, async (req, res) => {
+    try {
+        console.log(senderId);
+        // const { recieverId, message, type, repliedMessage, repliedType, repliedTo, repliedIsMe } = req.body;
+        let myChat = await Chat.findOne({ userId: senderId });
+        let recieverChat = await Chat.findOne({ userId: recieverId });
 
         const msg = {
             message,
@@ -72,103 +52,98 @@ chatRouter.post("/message/add-message", auth, async (req, res) => {
             isMe: repliedIsMe,
         };
 
-        if (!senderContent) {
-            let messages = [];
+        let messages = [];
 
             messages.push({
-                senderId: req.user,
+                senderId: senderId,
                 recieverId,
                 msg,
                 repliedMsg,
-                isSeen,
             });
 
-            myChat.contents.push({ userId: recieverId, messages });
+        if (!myChat) {
+            let contents = [];
+
+            contents.push({ recieverId, messages });
+
+            let user = new Chat({
+                userId: senderId,
+                contents,
+            });
+
+            user = await user.save();
+        } else {
+            const senderContent = myChat.contents.find(o => o.recieverId === recieverId);
+
+            if (!senderContent) {
+                myChat.contents.push({ recieverId, messages });
+                myChat = await myChat.save();
+            }
+
+            senderContent.messages.push({
+                senderId: senderId,
+                recieverId,
+                msg,
+                repliedMsg,
+            });
+            myChat = await myChat.save();
         }
-
-        senderContent.messages.push({
-            senderId: req.user,
-            recieverId,
-            msg,
-            repliedMsg,
-            isSeen,
-        });
-
 
         /////////////////////////////////////////////
 
         if (!recieverChat) {
             let contents = [];
-            let messages = [];
 
-            const msg = {
-                message,
-                type,
-            };
+            contents.push({ recieverId: senderId, messages });
 
-            const repliedMsg = {
-                repliedMessage,
-                type: repliedType,
-                repliedTo,
-                isMe: repliedIsMe,
-                
-            };
-
-            messages.push({
-                senderId: req.user,
-                recieverId,
-                msg,
-                repliedMsg,
-                isSeen,
-            });
-
-            contents.push({ userId: req.user, messages });
-
-            let reciever = new Chat({
+            let user = new Chat({
                 userId: recieverId,
                 contents,
             });
-            
-            reciever = await reciever.save();
-        }
 
-        
-        const recieverContent = recieverChat.contents.find(o => o.userId === req.user);
+            user = await user.save();
+        } else {
+            const recieverCont = recieverChat.contents.find(o => o.recieverId === senderId);
 
-        if (!recieverContent) {
-            let messages = [];
-
-            messages.push({
-                senderId: req.user,
+            if (!recieverCont) {
+                recieverChat.contents.push({ recieverId: senderId, messages });
+                recieverChat = await recieverChat.save();
+            }
+            recieverCont.messages.push({
+                senderId: senderId,
                 recieverId,
                 msg,
                 repliedMsg,
-                isSeen,
             });
+            recieverChat = await recieverChat.save();
+        }
+    } catch (e) {
+        console.log(e.message);
+    }
+});
 
-            recieverChat.contents.push({ userId: req.user, messages });
+
+chatRouter.post("/message/seen-message", auth, async (req, res) => {
+    try {
+        const {recieverId} = req.body;
+        let recieverChat = await Chat.findOne({ userId: recieverId });
+        
+        const me = recieverChat.contents.find(o => o.recieverId === req.user);
+
+        for (let i = 0; i < me.messages.length; i++) {
+                if (me.messages[i].isSeen == false) {
+                    me.messages[i].isSeen = true;
+                }
         }
 
-        
-
-        recieverContent.messages.push({
-            senderId: req.user,
-            recieverId,
-            msg,
-            repliedMsg,
-            isSeen,
-        });
-
-        myChat = await myChat.save();
         recieverChat = await recieverChat.save();
 
-        res.json(myChat);
+        res.json(recieverChat);
     } catch (e) {
         res.status(500).json({ error: e.message });
     }
 });
 
 
-
-module.exports = chatRouter;
+module.exports = {chatRouter, newChat};
 

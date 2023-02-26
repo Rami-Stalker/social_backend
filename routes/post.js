@@ -7,10 +7,31 @@ const { User } = require("../models/user");
 const postRouter = express.Router();
 
 // get all posts
-postRouter.get("/post/", async (req, res) => {
+postRouter.get("/post/", auth, async (req, res) => {
     try {
-        const posts = await Post.find({});
-        res.json(posts);
+        const user = await User.findById(req.user);
+
+        let allPostList = [];
+
+        const myPost = await Post.find({ userId: req.user });
+        
+        if (myPost) {
+            for (let i = 0; i < myPost.length; i++) {
+                allPostList.push(myPost[i]);
+            }
+        }
+
+        for (let i = 0; i < user.following.length; i++) {
+            let userPost = await Post.find({userId: user.following[i]});
+            for (let j = 0; j < userPost.length; j++) {
+                allPostList.push(userPost[j]);
+            }
+        }
+
+        allPostList.sort((a, b) => b.time - a.time).reverse();
+        
+
+        res.json(allPostList);
     } catch (e) {
         res.status(500).json({ error: e.message });
     }
@@ -32,6 +53,7 @@ postRouter.post("/post/add-post", auth, async (req, res) => {
 
         let post = new Post({
             userData: user,
+            userId: req.user,
             description,
             time: new Date().getTime(),
             posts,
@@ -47,10 +69,9 @@ postRouter.post("/post/add-post", auth, async (req, res) => {
 // update post
 postRouter.post("/post/update-post", async (req, res) => {
     try {
-        const { id, description, postUrl } = req.body;
-        let post = await Post.findById(id);
-        post.description = description,
-            post.postUrl = postUrl,
+        const { postId, desc } = req.body;
+        let post = await Post.findById(postId);
+            post.description = desc,
             post = await post.save();
         res.json(post);
     } catch (e) {
@@ -61,8 +82,8 @@ postRouter.post("/post/update-post", async (req, res) => {
 // delete post
 postRouter.post("/post/delete-post", async (req, res) => {
     try {
-        const { id } = req.body;
-        let post = await Post.findByIdAndDelete(id);
+        const { postId } = req.body;
+        let post = await Post.findByIdAndDelete(postId);
         res.json(post);
     } catch (e) {
         res.status(500).json({ error: e.message });
@@ -72,15 +93,16 @@ postRouter.post("/post/delete-post", async (req, res) => {
 // like post
 postRouter.post("/post/add-like", auth, async (req, res) => {
     try {
-        const { postId, isAdd } = req.body;
+        const { postId } = req.body;
         
-        const user = await User.findById(req.user);
         let post = await Post.findById(postId);
 
-        if (isAdd == 1) {
-            post.likes.push(user);
+        const meLike = post.likes.find(o => o === req.user);
+
+        if (meLike) {
+            post.likes = lodash.filter(post.likes, x => x !== req.user);
         }else{
-            post.likes = lodash.filter(post.likes, x => x.email !== user.email);
+            post.likes.push(req.user);
         }
 
         post = await post.save();
@@ -96,18 +118,15 @@ postRouter.post("/post/add-comment", auth, async (req, res) => {
         const { postId, comment, } = req.body;
 
         let post = await Post.findById(postId);
-        const user = await User.findById(req.user);
         
         post.comments.push({
-            userData: user,
+            userId: req.user,
             comment,
             time: new Date().getTime(),
         });
 
         post = await post.save();
-
         res.json(post);
-
     } catch (e) {
         res.status(500).json({ error: e.message });
     }
@@ -126,17 +145,18 @@ postRouter.get("/post/get-comment", async (req, res) => {
 // like comment
 postRouter.post("/post/like-comment", auth, async (req, res) => {
     try {
-        const { postId, commentId, isAdd } = req.body;
+        const { postId, commentId } = req.body;
         
-        const user = await User.findById(req.user);
         let post = await Post.findById(postId);
 
         const comment = post.comments.find(o => o.id === commentId);
 
-        if (isAdd == 1) {
-            comment.likes.push(user);
+        const meLike = comment.likes.find(o => o === req.user);
+
+        if (meLike) {
+            comment.likes = lodash.filter(comment.Likes, x => x !== req.user);
         }else{
-            comment.likes = lodash.filter(comment.Likes, x => x.id !== user.id);
+            comment.likes.push(req.user);
         }
 
         post = await post.save();

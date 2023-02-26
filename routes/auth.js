@@ -1,6 +1,7 @@
 const express = require("express");
 
 const { User } = require("../models/user");
+const Chat = require("../models/chat");
 const bcryptjs = require("bcryptjs");
 const authRouter = express.Router();
 const jwt = require("jsonwebtoken");
@@ -29,6 +30,12 @@ authRouter.post("/api/signup", async (req, res) => {
             photo,
         });
         user = await user.save();
+
+        let chat = new Chat({
+            userId: user.id,
+        });
+        chat = await chat.save();
+
         res.json(user);
     } catch (e) {
         res.status(500).json({ error: e.message });
@@ -72,7 +79,7 @@ authRouter.post("/tokenIsValid", async (req, res) => {
 });
 
 // get user data
-authRouter.get("/", auth, async (req, res) => {
+authRouter.get("/get-my-data", auth, async (req, res) => {
     const user = await User.findById(req.user);
     res.json({ ...user._doc, token: req.token });
 });

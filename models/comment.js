@@ -2,7 +2,10 @@ const mongoose = require("mongoose");
 const {userSchema} = require("./user");
 
 const commentSchema = mongoose.Schema({
-    userData: userSchema,
+    userId: {
+        required: true,
+        type: String,
+    },
     comment: {
         required: true,
         type: String,

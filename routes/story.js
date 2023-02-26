@@ -44,15 +44,16 @@ storyRouter.post("/story/add-story", auth, async (req, res) => {
 // like story
 storyRouter.post("/story/add-like", auth, async (req, res) => {
     try {
-        const { storyId, isAdd } = req.body;
-        
-        const user = await User.findById(req.user);
+        const { storyId } = req.body;
+
         let story = await Story.findById(storyId);
 
-        if (isAdd == 1) {
-            story.likes.push(user);
-        }else{
-            story.likes = lodash.filter(story.likes, x => x.email !== user.email);
+        const meLike = story.likes.find(o => o === req.user);
+
+        if (meLike) {
+            story.likes = lodash.filter(story.likes, x => x !== req.user);
+        } else {
+            story.likes.push(req.user);
         }
 
         story = await story.save();
@@ -68,14 +69,12 @@ storyRouter.post("/story/add-comment", auth, async (req, res) => {
         const { storyId, comment } = req.body;
 
         let story = await Story.findById(storyId);
-        const user = await User.findById(req.user);
-        
+
         story.comments.push({
-            userData: user,
+            userId: req.user,
             comment,
             time: new Date().getTime(),
         });
-
         story = await story.save();
 
         res.json(story);
@@ -98,17 +97,18 @@ storyRouter.get("/story/get-comment", async (req, res) => {
 // like comment
 storyRouter.post("/story/like-comment", auth, async (req, res) => {
     try {
-        const { storyId, commentId, isAdd } = req.body;
-        
-        const user = await User.findById(req.user);
+        const { storyId, commentId } = req.body;
+
         let story = await Story.findById(storyId);
 
         const comment = story.comments.find(o => o.id === commentId);
 
-        if (isAdd == 1) {
-            comment.likes.push(user);
-        }else{
-            comment.likes = lodash.filter(comment.Likes, x => x.id !== user.id);
+        const meLike = comment.likes.find(o => o === req.user);
+
+        if (meLike) {
+            comment.likes = lodash.filter(comment.Likes, x => x !== req.user);
+        } else {
+            comment.likes.push(req.user);
         }
 
         story = await story.save();

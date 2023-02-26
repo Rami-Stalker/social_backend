@@ -2,11 +2,11 @@ const mongoose = require("mongoose");
 
 const msgSchema = mongoose.Schema({
     senderId: {
-        required: true,
+        default: "",
         type: String,
     },
     recieverId: {
-        required: true,
+        default: "",
         type: String,
     },
     msg:
@@ -35,12 +35,12 @@ const msgSchema = mongoose.Schema({
             type: String,
         },
         isMe: {
-            default: "",
-            type: String,
+            default: false,
+            type: Boolean,
         },
     },
     like: {
-        required: false,
+        default: false,
         type: Boolean,
     },
     createdAt: {
@@ -48,7 +48,7 @@ const msgSchema = mongoose.Schema({
         type: Date,
     },
     isSeen: {
-        required: false,
+        default: false,
         type: Boolean,
     },
 });

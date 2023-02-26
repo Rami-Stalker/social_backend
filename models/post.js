@@ -4,14 +4,17 @@ const commentSchema = require("./comment");
 
 const postSchema = mongoose.Schema({
     userData: userSchema,
-    description: {
+    userId: {
         required: true,
+        type: String,
+    },
+    description: {
+        default: "",
         type: String,
     },
     likes: [
         {
             type: String,
-            // unique: true,
             default: "",
         },
     ],
