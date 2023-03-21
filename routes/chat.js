@@ -33,10 +33,7 @@ chatRouter.get("/add-chat", auth, async (req, res) => {
 });
 
 const newChat = ( async (senderId, recieverId, message, type, repliedMessage, repliedType, repliedTo, repliedIsMe) => {
-//chatRouter.post("/message/add-message", auth, async (req, res) => {
     try {
-        console.log(senderId);
-        // const { recieverId, message, type, repliedMessage, repliedType, repliedTo, repliedIsMe } = req.body;
         let myChat = await Chat.findOne({ userId: senderId });
         let recieverChat = await Chat.findOne({ userId: recieverId });
 

@@ -43,6 +43,7 @@ nameSpaceChat.on("connection", async (socket) => {
         nameSpaceChat.to(msg.senderId).emit('message', msg);
         nameSpaceChat.to(msg.recieverId).emit('message', msg);
         //socket.emit('message', msg);
+
         await newChat(
             msg.senderId,
             msg.recieverId,

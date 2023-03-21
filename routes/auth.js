@@ -10,7 +10,7 @@ const auth = require("../middlewares/auth");
 
 authRouter.post("/api/signup", async (req, res) => {
     try {
-        const { name, email, password, photo } = req.body;
+        const { name, email, password, photo, fcmtoken } = req.body;
 
         // multer for images
 
@@ -28,6 +28,7 @@ authRouter.post("/api/signup", async (req, res) => {
             email,
             password: hashedPassword,
             photo,
+            fcmtoken,
         });
         user = await user.save();
 
