@@ -8,10 +8,10 @@ const jwt = require("jsonwebtoken");
 const auth = require("../middlewares/auth");
 
 
-authRouter.post("/api/signup", async (req, res) => {
+authRouter.post("/register", async (req, res) => {
     try {
         const { name, email, password, photo, fcmtoken } = req.body;
-
+        
         // multer for images
 
         const existingUser = await User.findOne({ email });
@@ -43,7 +43,7 @@ authRouter.post("/api/signup", async (req, res) => {
     }
 });
 
-authRouter.post('/api/signin', async (req, res) => {
+authRouter.post('/login', async (req, res) => {
     try {
         const { email, password } = req.body;
 
@@ -64,30 +64,18 @@ authRouter.post('/api/signin', async (req, res) => {
     }
 });
 
-authRouter.post("/tokenIsValid", async (req, res) => {
+authRouter.post("/is-token-valid", async (req, res) => {
     try {
-        const token = req.header("x-auth-token");
+        const token = req.header("Authorization");
         if (!token) return res.json(false);
         const verified = jwt.verify(token, "passwordKeys");
         if (!verified) return res.json(false);
-
         const user = await User.findById(verified.id);
         if (!user) return res.json(false);
         res.json(true);
     } catch (e) {
         res.status(500).json({ error: e.message });
     }
-});
-
-// get user data
-authRouter.get("/get-my-data", auth, async (req, res) => {
-    const user = await User.findById(req.user);
-    res.json({ ...user._doc, token: req.token });
-});
-
-authRouter.get("/user-by-id", auth, async (req, res) => {
-    const user = await User.findById(req.query.userId);
-    res.json(user);
 });
 
 module.exports = authRouter;

@@ -7,7 +7,7 @@ const Story = require("../models/story");
 const { User } = require("../models/user");
 
 // get all stories
-storyRouter.get("/story/", async (req, res) => {
+storyRouter.get("/", async (req, res) => {
     try {
         const stories = await Story.find({});
         res.json(stories);
@@ -17,7 +17,7 @@ storyRouter.get("/story/", async (req, res) => {
 });
 
 // add story
-storyRouter.post("/story/add-story", auth, async (req, res) => {
+storyRouter.post("/add-story", auth, async (req, res) => {
     try {
         const { storiesUrl, storiesType } = req.body;
 
@@ -42,7 +42,7 @@ storyRouter.post("/story/add-story", auth, async (req, res) => {
 });
 
 // like story
-storyRouter.post("/story/add-like", auth, async (req, res) => {
+storyRouter.post("/add-like", auth, async (req, res) => {
     try {
         const { storyId } = req.body;
 
@@ -64,7 +64,7 @@ storyRouter.post("/story/add-like", auth, async (req, res) => {
 });
 
 // comment story
-storyRouter.post("/story/add-comment", auth, async (req, res) => {
+storyRouter.post("/add-comment", auth, async (req, res) => {
     try {
         const { storyId, comment } = req.body;
 
@@ -85,7 +85,7 @@ storyRouter.post("/story/add-comment", auth, async (req, res) => {
 });
 
 // get comment 
-storyRouter.get("/story/get-comment", async (req, res) => {
+storyRouter.get("/get-comment", async (req, res) => {
     try {
         const story = await Story.findById(req.query.storyId);
         res.json(story.comments);
@@ -95,7 +95,7 @@ storyRouter.get("/story/get-comment", async (req, res) => {
 });
 
 // like comment
-storyRouter.post("/story/like-comment", auth, async (req, res) => {
+storyRouter.post("/like-comment", auth, async (req, res) => {
     try {
         const { storyId, commentId } = req.body;
 

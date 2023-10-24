@@ -6,7 +6,17 @@ const userRouter = express.Router();
 const bcryptjs = require("bcryptjs");
 const lodash = require("lodash");
 
-userRouter.get("/api/users/search/:name", async (req, res) => {
+userRouter.get("/", auth, async (req, res) => {
+    const user = await User.findById(req.user);
+    res.json({ ...user._doc, token: req.token });
+});
+
+userRouter.get("/user-by-id", auth, async (req, res) => {
+    const user = await User.findById(req.query.userId);
+    res.json(user);
+});
+
+userRouter.get("/search/:name", async (req, res) => {
     try {
         const users = await User.find({
             name: { $regex: req.params.name, $options: "i" },
@@ -18,13 +28,13 @@ userRouter.get("/api/users/search/:name", async (req, res) => {
     }
 });
 
-userRouter.post("/api/user/follow", auth, async (req, res) => {
+userRouter.post("/follow-user", auth, async (req, res) => {
     try {
         const { userId } = req.body;
 
         let my = await User.findById(req.user);
         let user = await User.findById(userId);
-        
+
         const friend = my.following.find(o => o === userId);
 
         if (friend) {
@@ -43,7 +53,16 @@ userRouter.post("/api/user/follow", auth, async (req, res) => {
     }
 });
 
-userRouter.get("/api/user/get-userpost", async (req, res) => {
+userRouter.get("/get-user-posts", auth, async (req, res) => {
+    try {
+        const posts = await Post.find({ userId: req.user });
+        res.json(posts);
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
+userRouter.get("/get-user-posts-by-id", auth, async (req, res) => {
     try {
         const posts = await Post.find({ userId: req.query.userId });
         res.json(posts);
@@ -52,19 +71,19 @@ userRouter.get("/api/user/get-userpost", async (req, res) => {
     }
 });
 
-userRouter.post("/api/user/modify-data", auth, async (req, res) => {
+userRouter.post("/update-user-info", auth, async (req, res) => {
     try {
         const { name, bio, email, address, phone, photo, backgroundImage } = req.body;
 
         let user = await User.findById(req.user);
 
         user.name = name,
-        user.bio = bio,
-        user.email = email,
-        user.address = address,
-        user.phone = phone,
-        user.photo = photo,
-        user.backgroundImage = backgroundImage,
+            user.bio = bio,
+            user.email = email,
+            user.address = address,
+            user.phone = phone,
+            user.photo = photo,
+            user.backgroundImage = backgroundImage,
 
             user = await user.save();
         res.json(user);
@@ -73,7 +92,7 @@ userRouter.post("/api/user/modify-data", auth, async (req, res) => {
     }
 });
 
-userRouter.put("/api/user/private", auth, async (req, res) => {
+userRouter.put("/private", auth, async (req, res) => {
 
     let user = await User.findById(req.user);
     if (user.private == false) {
@@ -86,7 +105,7 @@ userRouter.put("/api/user/private", auth, async (req, res) => {
     res.json(user);
 });
 
-userRouter.post("/api/user/change-password", auth, async (req, res) => {
+userRouter.post("/change-password", auth, async (req, res) => {
     try {
         const { currentPassword, newPassword } = req.body;
 
@@ -107,9 +126,6 @@ userRouter.post("/api/user/change-password", auth, async (req, res) => {
         res.status(500).json({ error: e.message });
     }
 });
-
-
-
 
 module.exports = userRouter;
 

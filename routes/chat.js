@@ -15,7 +15,7 @@ const Chat = require("../models/chat");
 //     }
 // });
 
-chatRouter.get("/chat/", auth, async (req, res) => {
+chatRouter.get("/", auth, async (req, res) => {
         const myChat = await Chat.findOne({ userId: req.user });
         res.json(myChat);
 });
@@ -120,7 +120,7 @@ const newChat = ( async (senderId, recieverId, message, type, repliedMessage, re
 });
 
 
-chatRouter.post("/message/seen-message", auth, async (req, res) => {
+chatRouter.post("/seen-message", auth, async (req, res) => {
     try {
         const {recieverId} = req.body;
         let recieverChat = await Chat.findOne({ userId: recieverId });

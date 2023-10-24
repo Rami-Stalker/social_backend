@@ -43,8 +43,8 @@ const userSchema = mongoose.Schema({
         },
     ],
     photo: {
-        required: true,
         type: String,
+        default: "",
     },
     backgroundImage: {
         type: String,

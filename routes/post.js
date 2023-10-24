@@ -7,7 +7,7 @@ const { User } = require("../models/user");
 const postRouter = express.Router();
 
 // get all posts
-postRouter.get("/post/", auth, async (req, res) => {
+postRouter.get("/", auth, async (req, res) => {
     try {
         const user = await User.findById(req.user);
 
@@ -38,10 +38,9 @@ postRouter.get("/post/", auth, async (req, res) => {
 });
 
 // add post
-postRouter.post("/post/add-post", auth, async (req, res) => {
+postRouter.post("/add-post", auth, async (req, res) => {
     try {
         const { postsUrl, postsType, description } = req.body;
-
         const user = await User.findById(req.user);
 
         let posts = [];
@@ -49,7 +48,6 @@ postRouter.post("/post/add-post", auth, async (req, res) => {
         for (let i = 0; i < postsUrl.length; i++) {
             posts.push({ post: postsUrl[i], type: postsType[i] });
         }
-
 
         let post = new Post({
             userData: user,
@@ -67,7 +65,7 @@ postRouter.post("/post/add-post", auth, async (req, res) => {
 });
 
 // update post
-postRouter.post("/post/update-post", async (req, res) => {
+postRouter.post("/update-post", async (req, res) => {
     try {
         const { postId, desc } = req.body;
         let post = await Post.findById(postId);
@@ -80,7 +78,7 @@ postRouter.post("/post/update-post", async (req, res) => {
 });
 
 // delete post
-postRouter.post("/post/delete-post", async (req, res) => {
+postRouter.post("/delete-post", async (req, res) => {
     try {
         const { postId } = req.body;
         let post = await Post.findByIdAndDelete(postId);
@@ -91,7 +89,7 @@ postRouter.post("/post/delete-post", async (req, res) => {
 });
 
 // like post
-postRouter.post("/post/add-like", auth, async (req, res) => {
+postRouter.post("/add-like", auth, async (req, res) => {
     try {
         const { postId } = req.body;
         
@@ -113,9 +111,9 @@ postRouter.post("/post/add-like", auth, async (req, res) => {
 });
 
 // post comment
-postRouter.post("/post/add-comment", auth, async (req, res) => {
+postRouter.post("/add-comment", auth, async (req, res) => {
     try {
-        const { postId, comment, } = req.body;
+        const { postId, comment } = req.body;
 
         let post = await Post.findById(postId);
         
@@ -133,7 +131,7 @@ postRouter.post("/post/add-comment", auth, async (req, res) => {
 });
 
 // get comment
-postRouter.get("/post/get-comment", async (req, res) => {
+postRouter.get("/get-comment", async (req, res) => {
     try {
         const post = await Post.findById(req.query.postId);
         res.json(post.comments);
@@ -143,7 +141,7 @@ postRouter.get("/post/get-comment", async (req, res) => {
 });
 
 // like comment
-postRouter.post("/post/like-comment", auth, async (req, res) => {
+postRouter.post("/like-comment", auth, async (req, res) => {
     try {
         const { postId, commentId } = req.body;
         
