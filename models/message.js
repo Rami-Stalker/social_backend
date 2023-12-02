@@ -5,12 +5,7 @@ const msgSchema = mongoose.Schema({
         default: "",
         type: String,
     },
-    recieverId: {
-        default: "",
-        type: String,
-    },
-    msg:
-    {
+    msg: {
         message: {
             default: "",
             type: String,
@@ -20,8 +15,7 @@ const msgSchema = mongoose.Schema({
             type: String,
         },
     },
-    repliedMsg:
-    {
+    repliedMsg: {
         repliedMessage: {
             default: "",
             type: String,

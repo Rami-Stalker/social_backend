@@ -18,9 +18,15 @@ const postSchema = mongoose.Schema({
             default: "",
         },
     ],
-    time: {
-        required: true,
-        type: Number,
+    shares: [
+        {
+            type: String,
+            default: "",
+        },
+    ],
+    createdAt: {
+        type: Date,
+        default: Date.now,
     },
     posts: [
         {

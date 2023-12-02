@@ -11,6 +11,8 @@ postRouter.get("/", auth, async (req, res) => {
     try {
         const user = await User.findById(req.user);
 
+        console.log(req.user);
+
         let allPostList = [];
 
         const myPost = await Post.find({ userId: req.user });
@@ -21,14 +23,14 @@ postRouter.get("/", auth, async (req, res) => {
             }
         }
 
-        for (let i = 0; i < user.following.length; i++) {
-            let userPost = await Post.find({userId: user.following[i]});
+        for (let i = 0; i < user.friends.length; i++) {
+            let userPost = await Post.find({userId: user.friends[i]});
             for (let j = 0; j < userPost.length; j++) {
                 allPostList.push(userPost[j]);
             }
         }
 
-        allPostList.sort((a, b) => b.time - a.time).reverse();
+        allPostList.sort((a, b) => b.createdAt - a.createdAt).reverse();
         
 
         res.json(allPostList);
@@ -53,7 +55,6 @@ postRouter.post("/add-post", auth, async (req, res) => {
             userData: user,
             userId: req.user,
             description,
-            time: new Date().getTime(),
             posts,
         });
         post = await post.save();
@@ -120,7 +121,6 @@ postRouter.post("/add-comment", auth, async (req, res) => {
         post.comments.push({
             userId: req.user,
             comment,
-            time: new Date().getTime(),
         });
 
         post = await post.save();

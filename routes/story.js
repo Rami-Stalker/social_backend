@@ -73,7 +73,6 @@ storyRouter.post("/add-comment", auth, async (req, res) => {
         story.comments.push({
             userId: req.user,
             comment,
-            time: new Date().getTime(),
         });
         story = await story.save();
 

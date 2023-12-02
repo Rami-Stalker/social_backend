@@ -45,9 +45,11 @@ authRouter.post("/register", async (req, res) => {
 
 authRouter.post('/login', async (req, res) => {
     try {
+        cosnole.log("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb");
         const { email, password } = req.body;
 
         const user = await User.findOne({ email });
+        cosnole.log("ssssssssssssssssssssssssssss");
         if (!user) {
             return res.status(400).json({ msg: "User with this email does not exist!" });
         }
@@ -66,6 +68,7 @@ authRouter.post('/login', async (req, res) => {
 
 authRouter.post("/is-token-valid", async (req, res) => {
     try {
+        console.log('lllllllll');
         const token = req.header("Authorization");
         if (!token) return res.json(false);
         const verified = jwt.verify(token, "passwordKeys");

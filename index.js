@@ -1,28 +1,23 @@
 // // IMPORTS FROM PACKAGES
+// require('dotenv').config();
 // const express = require("express");
-// const mongoose = require("mongoose");
-// // IMPORTS FROM OTHER FILES
-// const connection = require("./Utils/connection");
-
-// const socketIOEvents = require("./middlewares/socket");
-
-// const authRouter = require("./routes/auth");
-// const userRouter = require("./routes/user");
-// const postRouter = require("./routes/post");
-// const storyRouter = require("./routes/story");
-// const { chatRouter, newChat } = require("./routes/chat");
-// const notificationRouter = require("./routes/notification");
-
-// // const dotenv = require('dotenv');
 // const http = require('http');
 // const { Server } = require("socket.io");
-// // app init
-// // const port = process.env.PORT || 8000;
-// // const DB =
-// //     "mongodb+srv://mramydaly:m2ramy4daly2@cluster0.4ot98md.mongodb.net/?retryWrites=true&w=majority";
+
+// // IMPORTS FROM OTHER FILES
+// const connection = require("./Utils/connection");
+// const socketIOEvents = require("./middlewares/socket");
+// const createChangeStream = require('./middlewares/stream_change');
+// const authMiddleware = require("./middlewares/auth");
+
+// const authRouter = require("./routes/auth");
+// const postRouter = require("./routes/post");
+// const storyRouter = require("./routes/story");
+// const userRouter = require("./routes/user");
+// const chatRouter = require("./routes/chat");
+// const notificationRouter = require("./routes/notification");
 
 // // INIT
-// // dotenv.config();
 // let port = null;
 // let app = null;
 // let server = null;
@@ -33,12 +28,16 @@
 //     app = express();
 //     server = http.createServer(app);
 //     io = new Server(server);
-//     socketIOEvents(io);
+
+//     await connection();
+
+//     app.use(authMiddleware);
+//     const userIdToTrack = app.locals.userId;
+//     createChangeStream(userIdToTrack);
 // }
 
-
-// // middleware 
-// const middleware = async () => {
+// // middleware
+// const middleware = () => {
 //     app.use(express.urlencoded({ extended: false }));
 //     app.use(express.json({ extended: false }));
 
@@ -48,143 +47,84 @@
 //     app.use("/api/story", storyRouter);
 //     app.use("/api/chat", chatRouter);
 //     app.use("/api/notification", notificationRouter);
+//     app.use("/api/stream-change", streamChangeRouter);
+    
 // }
 
-// // channel
-// // const nameSpaceChat = io.of('/socket-chat-message');
-// // nameSpaceChat.on("connection", async (socket) => {
-// //     console.log('a user connected');
-// //     socket.on("signin", (id) => {
-// //         socket.join(id);
-// //         console.log(id);
-// //     });
-
-// //     socket.on("message", async (msg) => {
-// //         nameSpaceChat.to(msg.senderId).emit('message', msg);
-// //         nameSpaceChat.to(msg.recieverId).emit('message', msg);
-// //         //socket.emit('message', msg);
-
-// //         await newChat(
-// //             msg.senderId,
-// //             msg.recieverId,
-// //             msg.message,
-// //             msg.type,
-// //             msg.repliedMessage,
-// //             msg.repliedType,
-// //             msg.repliedTo,
-// //             msg.repliedIsMe,
-// //         );
-// //     });
-// // });
-
-// //Connections
-// const ListenToPort = async () => {
-//     server.listen(port, async () => {
+// const ListenToPort = () => {
+//     server.listen(port, () => {
 //         console.log("Rest Api Port Connected " + port);
 //     });
 // }
 
 // // Connections
 // initVar().then(() => {
-//     ListenToPort().then(() => {
-//         middleware().then(() => {
-//             connection();
-//         })
-//     })
+//     middleware();
+//     ListenToPort();
+//     socketIOEvents(io);
 // });
 
-
-
-// // async function connect() {
-// //     try {
-// //         await mongoose.connect(DB);
-// //         console.log("connected to MongoDB");
-// //     } catch (error) {
-// //         console.error(error);
-// //     }
-// // }
-
-// // connect();
-
-// // server.listen(8000, () => {
-// //     console.log('server started');
-// // });
-
+require('dotenv').config();
 const express = require("express");
-const app = express();
-const mongoose = require("mongoose");
 const http = require('http');
-const cors = require('cors');
-// IMPORTS FROM OTHER FILES
+const { Server } = require("socket.io");
+
+const connection = require("./Utils/connection");
+const socketIOEvents = require("./middlewares/socket");
+const createChangeStream = require('./middlewares/stream_change');
+const authMiddleware = require("./middlewares/auth");
+
 const authRouter = require("./routes/auth");
 const postRouter = require("./routes/post");
 const storyRouter = require("./routes/story");
 const userRouter = require("./routes/user");
-const { chatRouter, newChat } = require("./routes/chat");
+const chatRouter = require("./routes/chat");
 const notificationRouter = require("./routes/notification");
-const auth = require("./middlewares/auth");
-const socketIOEvents = require("./middlewares/socket");
-var server = http.createServer(app);
-var io = require("socket.io")(server);
 
-// app init
+const app = express();
 const port = process.env.PORT || 8000;
-const DB =
-"mongodb+srv://mramydaly:m2ramy4daly2@cluster0.4ot98md.mongodb.net/";
+const server = http.createServer(app);
+const io = new Server(server);
 
-
-// middleware
-app.use(express.json());
-app.use(cors());
-app.use("/api/authentication", authRouter);
-app.use("/api/user", userRouter);
-app.use("/api/post", postRouter);
-app.use("/api/story", storyRouter);
-app.use("/api/chat", chatRouter);
-app.use("/api/notification", notificationRouter);
-
-socketIOEvents(io);
-
-// channel
-// const nameSpaceChat = io.of('/socket-chat-message');
-// nameSpaceChat.on("connection", async (socket) => {
-//     console.log('a user connected');
-//     socket.on("signin", (id) => {
-//         socket.join(id);
-//         console.log(id);
-//     });
-//     socket.on("message", async (msg) => {
-//         nameSpaceChat.to(msg.senderId).emit('message', msg);
-//         nameSpaceChat.to(msg.recieverId).emit('message', msg);
-//         //socket.emit('message', msg);
-
-//         await newChat(
-//             msg.senderId,
-//             msg.recieverId,
-//             msg.message,
-//             msg.type,
-//             msg.repliedMessage,
-//             msg.repliedType,
-//             msg.repliedTo,
-//             msg.repliedIsMe,
-//         );
-//     });
-// });
-
-//Connections
-async function connect() {
+const initApp = async () => {
     try {
-        await mongoose.connect(DB);
-        console.log("connected to MongoDB");
+        await connection();
+        // app.use(authMiddleware);
+        // const userIdToTrack = app.locals.userId;
+        // createChangeStream(userIdToTrack);
     } catch (error) {
-        console.error(error);
+        console.error("Error during initialization:", error);
+        process.exit(1);
     }
-}
+};
 
-connect();
+const configureMiddleware = () => {
+    app.use(express.urlencoded({ extended: false }));
+    app.use(express.json({ extended: false }));
 
-server.listen(8000, () => {
-    console.log('server started');
-});
+    app.use("/api/authentication", authRouter);
+    app.use("/api/chat", chatRouter);
+    app.use("/api/notification", notificationRouter);
+    app.use("/api/post", postRouter);
+    app.use("/api/story", storyRouter);
+    app.use("/api/user", userRouter);
+};
 
-// yAqyGYPxAEuugRGl
+const listenToPort = () => {
+    server.listen(port, () => {
+        console.log("Rest Api Port Connected " + port);
+    });
+};
+
+// Connections
+initApp()
+    .then(() => {
+        configureMiddleware();
+        listenToPort();
+        socketIOEvents(io);
+    })
+    .catch((error) => {
+        console.error("Error during initialization:", error);
+        process.exit(1);
+    });
+

@@ -6,8 +6,10 @@ var serviceAcount = require("../config/push_notification_key.json");
 const certPath = admin.credential.cert(serviceAcount);
 var FCM = new fcm(certPath);
 
-exports.sendPushNotification = (req, res, next) => {
+exports.sendPushNotification = (req, res) => {
     try {
+        console.log('uuuuuuuuuuuuuu');
+        console.log(req.body.userId);
         const user =  User.findById(req.body.userId);
         let message = {
             notification: {

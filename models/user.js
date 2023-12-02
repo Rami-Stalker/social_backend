@@ -30,13 +30,13 @@ const userSchema = mongoose.Schema({
         default: "",
         max: 100,
     },
-    followers: [
+    friendRequests: [
         {
             type: String,
             default: "",
         },
     ],
-    following: [
+    friends: [
         {
             type: String,
             default: "",
@@ -66,7 +66,15 @@ const userSchema = mongoose.Schema({
         type: Boolean,
         default: false,
     },
-    fcmtoken: {
+    isOnline: {
+        type: Boolean,
+        default: false,
+    },
+    lastActive: {
+        type: Date,
+        default: Date.now,
+    },
+    fcmToken: {
         type: String,
         default: "",
     },

@@ -62,7 +62,7 @@ userRouter.get("/get-user-posts", auth, async (req, res) => {
     }
 });
 
-userRouter.get("/get-user-posts-by-id", auth, async (req, res) => {
+userRouter.get("/get-another-user-posts", auth, async (req, res) => {
     try {
         const posts = await Post.find({ userId: req.query.userId });
         res.json(posts);
@@ -75,18 +75,29 @@ userRouter.post("/update-user-info", auth, async (req, res) => {
     try {
         const { name, bio, email, address, phone, photo, backgroundImage } = req.body;
 
-        let user = await User.findById(req.user);
-
-        user.name = name,
-            user.bio = bio,
-            user.email = email,
-            user.address = address,
-            user.phone = phone,
-            user.photo = photo,
-            user.backgroundImage = backgroundImage,
-
-            user = await user.save();
+        let user = await User.findOneAndUpdate(req.user, {
+            name: name,
+            bio: bio,
+            email: email,
+            address: address,
+            phone: phone,
+            photo: photo,
+            backgroundImage: backgroundImage,
+        }).save();
         res.json(user);
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
+userRouter.post('/save-user-fcm-token', auth ,async (req, res) => {
+    const { fcmToken } = req.body;
+    try {
+        console.log(fcmToken);
+        let user = await User.findById(req.user);
+        user.fcmToken = fcmToken;
+        user = await user.save();
+        res.status(200).json(user);
     } catch (e) {
         res.status(500).json({ error: e.message });
     }
