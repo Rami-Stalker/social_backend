@@ -1,33 +1,49 @@
 const mongoose = require("mongoose");
-const { userSchema } = require("./user");
 const commentSchema = require("./comment");
 
 const storySchema = mongoose.Schema({
-    userData: userSchema,
-    likes: [
+    storyId: {
+        type: String,
+        required: true,
+    },
+    userId: {
+        type: String,
+        required: true,
+    },
+    userName: {
+        type: String,
+        required: true,
+    },
+    userAvatarUrl: {
+        type: String,
+        required: true,
+    },
+    imageUrls: [
         {
             type: String,
             default: "",
         },
     ],
-    createdAt: {
-        default: Date.now,
-        type: Date,
-        expires: 86400,
-    },
-    stories: [
+    videoUrls: [
         {
-            story: {
-                default: "",
-                type: String,
-            },
-            type:{
-                default: "",
-                type: String,
-            },
+            type: String,
+            default: "",
         },
     ],
+    timestamp: {
+        type: Date,
+        default: Date.now,
+        expires: 86400,
+    },
     comments: [commentSchema],
+    views: {
+        type: Number,
+        default: 0,
+    },
+    likes: {
+        type: Number,
+        default: 0,
+    },
 });
 
 const Story = mongoose.model("Story", storySchema);

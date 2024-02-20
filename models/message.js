@@ -10,6 +10,10 @@ const msgSchema = mongoose.Schema({
             default: "",
             type: String,
         },
+        messageImage: {
+            default: "",
+            type: String,
+        },
         type: {
             default: "",
             type: String,
@@ -38,8 +42,8 @@ const msgSchema = mongoose.Schema({
         type: Boolean,
     },
     createdAt: {
-        default: Date.now,
         type: Date,
+        default: Date.now,
     },
     isSeen: {
         default: false,

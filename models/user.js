@@ -30,13 +30,13 @@ const userSchema = mongoose.Schema({
         default: "",
         max: 100,
     },
-    friendRequests: [
+    following: [
         {
             type: String,
             default: "",
         },
     ],
-    friends: [
+    followers: [
         {
             type: String,
             default: "",

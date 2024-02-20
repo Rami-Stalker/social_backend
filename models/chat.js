@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const contentSchema = require("./content");
+const contactSchema = require("./contact");
 
 const chatSchema = mongoose.Schema({
     userId: {
@@ -7,7 +7,7 @@ const chatSchema = mongoose.Schema({
         required: true,
         unique: true,
     },
-    contents: [contentSchema],
+    contacts: [contactSchema],
 });
 
 const Chat = mongoose.model("Chat", chatSchema);

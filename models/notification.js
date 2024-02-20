@@ -23,7 +23,6 @@ const notificationSchema = mongoose.Schema({
         {
             type: String,
             default: "",
-            unique: true,
         },
     ],
     createdAt: {

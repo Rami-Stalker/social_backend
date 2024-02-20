@@ -1,46 +1,52 @@
 const mongoose = require("mongoose");
-const { userSchema } = require("./user");
 const commentSchema = require("./comment");
 
 const postSchema = mongoose.Schema({
-    userData: userSchema,
     userId: {
+        type: String,
         required: true,
-        type: String,
     },
-    description: {
+    userName: {
+        type: String,
+        required: true,
+    },
+    userAvatarUrl: {
+        type: String,
+        required: true,
+    },
+    postText: {
+        type: String,
         default: "",
-        type: String,
     },
-    likes: [
+    imageUrls: [
         {
             type: String,
             default: "",
         },
     ],
-    shares: [
+    videoUrls: [
         {
             type: String,
             default: "",
         },
     ],
-    createdAt: {
+    timestamp: {
         type: Date,
         default: Date.now,
     },
-    posts: [
-        {
-            post: {
-                default: "",
-                type: String,
-            },
-            type:{
-                default: "",
-                type: String,
-            },
-        },
-    ],
     comments: [commentSchema],
+    shares: {
+        type: Number,
+        default: 0,
+    },
+    saves: {
+        type: Number,
+        default: 0,
+    },
+    likes: {
+        type: Number,
+        default: 0,
+    },  
 });
 
 const Post = mongoose.model("Post", postSchema);

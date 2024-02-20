@@ -5,14 +5,10 @@ const Chat = require("../models/chat");
 const bcryptjs = require("bcryptjs");
 const authRouter = express.Router();
 const jwt = require("jsonwebtoken");
-const auth = require("../middlewares/auth");
-
 
 authRouter.post("/register", async (req, res) => {
     try {
         const { name, email, password, photo, fcmtoken } = req.body;
-        
-        // multer for images
 
         const existingUser = await User.findOne({ email });
         if (existingUser) {
@@ -43,13 +39,11 @@ authRouter.post("/register", async (req, res) => {
     }
 });
 
-authRouter.post('/login', async (req, res) => {
+authRouter.post("/login", async (req, res) => {
     try {
-        cosnole.log("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb");
         const { email, password } = req.body;
 
         const user = await User.findOne({ email });
-        cosnole.log("ssssssssssssssssssssssssssss");
         if (!user) {
             return res.status(400).json({ msg: "User with this email does not exist!" });
         }
@@ -66,9 +60,31 @@ authRouter.post('/login', async (req, res) => {
     }
 });
 
+// authRouter.post('/login', async (req, res) => {
+//     try {
+//         cosnole.log("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb");
+//         const { email, password } = req.body;
+
+//         const user = await User.findOne({ email });
+//         cosnole.log("ssssssssssssssssssssssssssss");
+//         if (!user) {
+//             return res.status(400).json({ msg: "User with this email does not exist!" });
+//         }
+//         const isMatch = await bcryptjs.compare(password, user.password);
+//         if (!isMatch) {
+//             return res.status(400).json({ msg: "Incorrect password." });
+//         }
+//         const token = jwt.sign({ id: user._id }, "passwordKeys");
+
+//         res.json({ token, ...user._doc });
+
+//     } catch (e) {
+//         res.status(500).json({ error: e.toString });
+//     }
+// });
+
 authRouter.post("/is-token-valid", async (req, res) => {
     try {
-        console.log('lllllllll');
         const token = req.header("Authorization");
         if (!token) return res.json(false);
         const verified = jwt.verify(token, "passwordKeys");

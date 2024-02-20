@@ -1,13 +1,10 @@
 const Post = require('../models/post');
 const Story = require('../models/story');
 const { User } = require('../models/user');
-const sendNotification = require('../controller/push_notification');
+const sendNotification = require('../controllers/push_notification');
 const { POST_CHANGE , STORY_CHANGE } = require('../actions/whach');
 
 const createChangeStream = (userIdToTrack) => {
-    console.log('jjjjjjjjjjjjjjjjjjj');
-    console.log(userIdToTrack);
-    // Create a change stream for posts
     const postChangeStream = Post.watch(
         [
             {
@@ -50,7 +47,6 @@ const createChangeStream = (userIdToTrack) => {
         // }
     });
 
-    // Create a change stream for stories
     const storyChangeStream = Story.watch(
         [
             {

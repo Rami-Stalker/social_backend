@@ -11,29 +11,26 @@ postRouter.get("/", auth, async (req, res) => {
     try {
         const user = await User.findById(req.user);
 
-        console.log(req.user);
+        let allPosts = [];
 
-        let allPostList = [];
+        const userPosts = await Post.find({ userId: req.user });
 
-        const myPost = await Post.find({ userId: req.user });
-        
-        if (myPost) {
-            for (let i = 0; i < myPost.length; i++) {
-                allPostList.push(myPost[i]);
+        if (userPosts) {
+            for (let i = 0; i < userPosts.length; i++) {
+                allPosts.push(userPosts[i]);
             }
         }
 
-        for (let i = 0; i < user.friends.length; i++) {
-            let userPost = await Post.find({userId: user.friends[i]});
-            for (let j = 0; j < userPost.length; j++) {
-                allPostList.push(userPost[j]);
+        for (let i = 0; i < user.following.length; i++) {
+            let followingPosts = await Post.find({userId: user.following[i]});
+            for (let j = 0; j < followingPosts.length; j++) {
+                allPosts.push(followingPosts[j]);
             }
         }
 
-        allPostList.sort((a, b) => b.createdAt - a.createdAt).reverse();
+        allPosts.sort((a, b) => b.createdAt - a.createdAt).reverse();
         
-
-        res.json(allPostList);
+        res.json(allPosts);
     } catch (e) {
         res.status(500).json({ error: e.message });
     }
@@ -42,96 +39,28 @@ postRouter.get("/", auth, async (req, res) => {
 // add post
 postRouter.post("/add-post", auth, async (req, res) => {
     try {
-        const { postsUrl, postsType, description } = req.body;
-        const user = await User.findById(req.user);
+    const { imageUrls, videoUrls, postText } = req.body;
 
-        let posts = [];
+    const user = await User.findById(req.user);
 
-        for (let i = 0; i < postsUrl.length; i++) {
-            posts.push({ post: postsUrl[i], type: postsType[i] });
-        }
+    let post = new Post({
+        userId: req.user,
+        userName: user.name,
+        userAvatarUrl: user.userAvatarUrl,
+        postText,
+        imageUrls,
+        videoUrls,
+    });
+    post = await post.save();
 
-        let post = new Post({
-            userData: user,
-            userId: req.user,
-            description,
-            posts,
-        });
-        post = await post.save();
-
-        res.json(post);
+    res.json(post);
     } catch (e) {
         res.status(500).json({ error: e.message });
     }
 });
 
-// update post
-postRouter.post("/update-post", async (req, res) => {
-    try {
-        const { postId, desc } = req.body;
-        let post = await Post.findById(postId);
-            post.description = desc,
-            post = await post.save();
-        res.json(post);
-    } catch (e) {
-        res.status(500).json({ error: e.message });
-    }
-});
-
-// delete post
-postRouter.post("/delete-post", async (req, res) => {
-    try {
-        const { postId } = req.body;
-        let post = await Post.findByIdAndDelete(postId);
-        res.json(post);
-    } catch (e) {
-        res.status(500).json({ error: e.message });
-    }
-});
-
-// like post
-postRouter.post("/add-like", auth, async (req, res) => {
-    try {
-        const { postId } = req.body;
-        
-        let post = await Post.findById(postId);
-
-        const meLike = post.likes.find(o => o === req.user);
-
-        if (meLike) {
-            post.likes = lodash.filter(post.likes, x => x !== req.user);
-        }else{
-            post.likes.push(req.user);
-        }
-
-        post = await post.save();
-        res.json(post);
-    } catch (e) {
-        res.status(500).json({ error: e.message });
-    }
-});
-
-// post comment
-postRouter.post("/add-comment", auth, async (req, res) => {
-    try {
-        const { postId, comment } = req.body;
-
-        let post = await Post.findById(postId);
-        
-        post.comments.push({
-            userId: req.user,
-            comment,
-        });
-
-        post = await post.save();
-        res.json(post);
-    } catch (e) {
-        res.status(500).json({ error: e.message });
-    }
-});
-
-// get comment
-postRouter.get("/get-comment", async (req, res) => {
+// get post comments
+postRouter.get("/get-post-comments", async (req, res) => {
     try {
         const post = await Post.findById(req.query.postId);
         res.json(post.comments);
@@ -158,6 +87,31 @@ postRouter.post("/like-comment", auth, async (req, res) => {
         }
 
         post = await post.save();
+        res.json(post);
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
+
+// update post
+postRouter.post("/update-post", async (req, res) => {
+    try {
+        const { postId, desc } = req.body;
+        let post = await Post.findById(postId);
+            post.description = desc,
+            post = await post.save();
+        res.json(post);
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
+// delete post
+postRouter.post("/delete-post", async (req, res) => {
+    try {
+        const { postId } = req.body;
+        let post = await Post.findByIdAndDelete(postId);
         res.json(post);
     } catch (e) {
         res.status(500).json({ error: e.message });

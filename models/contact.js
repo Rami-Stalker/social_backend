@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 const { userSchema } = require("./user");
 const msgSchema = require("./message");
 
-const contentSchema = mongoose.Schema({
+const contactSchema = mongoose.Schema({
     recieverId: {
         type: String,
         default: "",
@@ -20,5 +20,5 @@ const contentSchema = mongoose.Schema({
     messages: [msgSchema],
 });
 
-module.exports = contentSchema;
+module.exports = contactSchema;
 

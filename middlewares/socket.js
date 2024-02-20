@@ -1,5 +1,5 @@
 // Assuming that ADD_PRODUCT is a function to add a new product
-const { IS_USER_ONLINE, GET_ALL_NOTIFICATIONS, GET_ALL_POSTS, CHANGE_LIKE_POST, ADD_COMMENT_POST, CHANGE_LIKE_COMMENT_POST, ADD_SHARE_POST, CHANGE_FRIEND_CASE_USER, ADD_MESSAGE, IS_MESSAGE_SEEN } = require('../actions/socketio');
+const { IS_USER_ONLINE, GET_ALL_NOTIFICATIONS, GET_ALL_POSTS, LIKE_POST, COMMENT_POST, COMMENT_LIKE_POST, SHARE_POST,  LIKE_STORY, COMMENT_STORY, COMMENT_LIKE_STORY, SHARE_STORY,  UPDATE_AVATAR, UPDATE_USER_INFO, FOLLOW_USER, UNFOLLOW_USER, REMOVE_USER, ADD_MESSAGE, IS_MESSAGE_SEEN } = require('../actions/socketio');
 
 const socketIOEvents = (io) => {
     const userSocketMap = new Map();
@@ -40,7 +40,10 @@ const socketIOEvents = (io) => {
             }
         });
 
+
         // Post
+
+        // Get All Posts
         socket.on('get-all-posts', async (data) => {
             try {
                 const getAllPost = await GET_ALL_POSTS(data);
@@ -51,58 +54,159 @@ const socketIOEvents = (io) => {
             }
         });
 
-        socket.on('change-like-post', async (data) => {
+        // Post Like
+        socket.on('like-post', async (data) => {
             try {
-                const likePost = await CHANGE_LIKE_POST(data);
-                socket.emit('changed-like-post', likePost);
+                const likePost = await LIKE_POST(data);
+                socket.emit('liked-post', likePost);
             } catch (error) {
-                console.error('Error Change Like Post:', error.message);
-                socket.emit('change-like-post-error', { error: error.message });
+                console.error('Error Like Post:', error.message);
+                socket.emit('like-post-error', { error: error.message });
             }
         });
 
-        socket.on('add-comment-post', async (data) => {
+        // Post Comment
+        socket.on('comment-post', async (data) => {
             try {
-                const addCommentPost = await ADD_COMMENT_POST(data);
-                socket.emit('added-comment-post', addCommentPost);
+                const commentPost = await COMMENT_POST(data);
+                socket.emit('commented-post', commentPost);
             } catch (error) {
-                console.error('Error Add Comment Post:', error.message);
-                socket.emit('add-comment-post-error', { error: error.message });
+                console.error('Error Comment Post:', error.message);
+                socket.emit('comment-post-error', { error: error.message });
             }
         });
 
-
-        socket.on('change-like-comment-post', async (data) => {
+        // Post Comment Like
+        socket.on('comment-like-post', async (data) => {
             try {
-                const changeLikeCommentPost = await CHANGE_LIKE_COMMENT_POST(data);
-                socket.emit('changed-like-comment-post', changeLikeCommentPost);
+                const commentLikePost = await COMMENT_LIKE_POST(data);
+                socket.emit('commented-like-post', commentLikePost);
             } catch (error) {
                 console.error('Error Change Like Comment Post:', error.message);
-                socket.emit('change-like-comment-post-error', { error: error.message });
+                socket.emit('comment-like-post-error', { error: error.message });
             }
         });
 
-        socket.on('add-share-post', async (data) => {
+        // Share Post
+        socket.on('share-post', async (data) => {
             try {
-                const sharePost = await ADD_SHARE_POST(data);
-                socket.emit('added-share-post', sharePost);
+                const sharePost = await SHARE_POST(data);
+                socket.emit('shared-post', sharePost);
             } catch (error) {
                 console.error('Error Add Share Post:', error.message);
-                socket.emit('add-share-post-error', { error: error.message });
+                socket.emit('share-post-error', { error: error.message });
             }
         });
+
+        
+        // Story
+
+        // Story Like
+        socket.on('like-story', async (data) => {
+            try {
+                const likeStory = await LIKE_STORY(data);
+                socket.emit('liked-story', likeStory);
+            } catch (error) {
+                console.error('Error Like Story:', error.message);
+                socket.emit('like-story-error', { error: error.message });
+            }
+        });
+
+        // Story Comment
+        socket.on('comment-story', async (data) => {
+            try {
+                const commentStory = await COMMENT_STORY(data);
+                socket.emit('commented-story', commentStory);
+            } catch (error) {
+                console.error('Error Comment Story:', error.message);
+                socket.emit('comment-story-error', { error: error.message });
+            }
+        });
+
+        // Story Comment Like
+        socket.on('comment-like-story', async (data) => {
+            try {
+                const commentLikeStory = await COMMENT_LIKE_STORY(data);
+                socket.emit('commented-like-story', commentLikeStory);
+            } catch (error) {
+                console.error('Comment Like Story Error:', error.message);
+                socket.emit('comment-like-story-error', { error: error.message });
+            }
+        });
+
+        // Story Share
+        socket.on('share-story', async (data) => {
+            try {
+                const sharestory = await SHARE_STORY(data);
+                socket.emit('shared-story', sharestory);
+            } catch (error) {
+                console.error('Share Story Error:', error.message);
+                socket.emit('share-story-error', { error: error.message });
+            }
+        });
+
 
         // User
-        socket.on('change-friend-case-user', async (data) => {
+
+        // User Update Avatar
+        socket.on('update-avatar', async (data) => {
             try {
-                const changeFriendCaseUser = await CHANGE_FRIEND_CASE_USER(data);
-                socket.emit('changed-friend-case-user', changeFriendCaseUser);
+                const updateUserInfo = await UPDATE_AVATAR(data);
+                socket.emit('updated-avatar', updateUserInfo);
             } catch (error) {
-                console.error('Error Change Friend Case User:', error.message);
-                socket.emit('change-friend-case-user-error', { error: error.message });
+                console.error('Esrror Udpate User Info:', error.message);
+                socket.emit('update-avatar-error', { error: error.message });
             }
         });
 
+        // User Update Info
+        socket.on('update-user-info', async (data) => {
+            try {
+                const updateUserInfo = await UPDATE_USER_INFO(data);
+                socket.emit('updated-user-info', updateUserInfo);
+            } catch (error) {
+                console.error('Error Udpate User Info:', error.message);
+                socket.emit('update-user-info-error', { error: error.message });
+            }
+        });
+
+        // Follow User
+        socket.on('follow-user', async (data) => {
+            try {
+                const followUser = await FOLLOW_USER(data);
+                socket.emit('followed-user', followUser);
+            } catch (error) {
+                console.error('Error Follow User:', error.message);
+                socket.emit('follow-user-error', { error: error.message });
+            }
+        });
+
+        // Unfollow User
+        socket.on('unfollow-user', async (data) => {
+            try {
+                const unFollowUser = await UNFOLLOW_USER(data);
+                socket.emit('unfollowed-user', unFollowUser);
+            } catch (error) {
+                console.error('Error unFollow User:', error.message);
+                socket.emit('unfollow-user-error', { error: error.message });
+            }
+        });
+
+        // Remove User
+        socket.on('remove-user', async (data) => {
+            try {
+                const removeUser = await REMOVE_USER(data);
+                socket.emit('removed-user', removeUser);
+            } catch (error) {
+                console.error('Error remove User:', error.message);
+                socket.emit('remove-user-error', { error: error.message });
+            }
+        });
+
+
+        // Chat
+
+        // Chat Rooms
         socket.on('join-room-chat', (room) => {
             socket.join(room['idConversation']);
         });
@@ -116,22 +220,23 @@ const socketIOEvents = (io) => {
             userSocketMap.set(userId, socket.id);
         });
 
-        // Chat
+        // Chat Add Message
         socket.on('add-message', async (data) => {
             try {
                 // const room = data['idConversation'];
                 const addMessage = await ADD_MESSAGE(data);
-                const targetSenderSocketId = findTargetSocketId(data['message'].senderId);
+                console.log(addMessage);
+                // const targetSenderSocketId = findTargetSocketId(data['message'].senderId);
                 const targetRecieverSocketId = findTargetSocketId(data['message'].recieverId);
-                io.to(targetSenderSocketId).emit('added-message', addMessage['sender-content']);
-                io.to(targetRecieverSocketId).emit('added-message', addMessage['reciever-content']);
+                // io.to(targetSenderSocketId).emit('added-message', addMessage['sender-contacts']);
+                io.to(targetRecieverSocketId).emit('added-message', addMessage);
             } catch (error) {
-                console.error('Error Add Message:', error.message);
+                console.err('Error Add Message:', error.message);
                 socket.emit('add-message-error', { error: error.message });
             }
         });
 
-        // Is Message Seen
+        // Chat Is Message Seen
         socket.on('is-message-seen', async (data) => {
             try {
                 const messageSeen = await IS_MESSAGE_SEEN(data);

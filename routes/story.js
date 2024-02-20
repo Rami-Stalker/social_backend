@@ -7,10 +7,30 @@ const Story = require("../models/story");
 const { User } = require("../models/user");
 
 // get all stories
-storyRouter.get("/", async (req, res) => {
+storyRouter.get("/", auth, async (req, res) => {
     try {
-        const stories = await Story.find({});
-        res.json(stories);
+        const user = await User.findById(req.user);
+
+        let allStories = [];
+
+        const userStories = await Story.find({ userId: req.user });
+        
+        if (userStories) {
+            for (let i = 0; i < userStories.length; i++) {
+                allStories.push(userStories[i]);
+            }
+        }
+
+        for (let i = 0; i < user.following.length; i++) {
+            let followingStories = await Story.find({userId: user.following[i]});
+            for (let j = 0; j < followingStories.length; j++) {
+                allStories.push(followingStories[j]);
+            }
+        }
+
+        allStories.sort((a, b) => b.createdAt - a.createdAt).reverse();
+        
+        res.json(allStories);
     } catch (e) {
         res.status(500).json({ error: e.message });
     }
@@ -19,72 +39,27 @@ storyRouter.get("/", async (req, res) => {
 // add story
 storyRouter.post("/add-story", auth, async (req, res) => {
     try {
-        const { storiesUrl, storiesType } = req.body;
+    const { imageUrls, videoUrls } = req.body;
 
-        const user = await User.findById(req.user);
+    const user = await User.findById(req.user);
 
-        let stories = [];
+    let story = new Story({
+        userId: req.user,
+        userName: user.name,
+        userAvatarUrl: user.userAvatarUrl,
+        imageUrls,
+        videoUrls,
+    });
+    story = await story.save();
 
-        for (let i = 0; i < storiesUrl.length; i++) {
-            stories.push({ story: storiesUrl[i], type: storiesType[i] });
-        }
-
-        let story = new Story({
-            userData: user,
-            stories,
-        });
-        story = await story.save();
-
-        res.json(story);
+    res.json(story);
     } catch (e) {
-        res.status(500).json({ error: e.message });
+    res.status(500).json({ error: e.message });
     }
 });
 
-// like story
-storyRouter.post("/add-like", auth, async (req, res) => {
-    try {
-        const { storyId } = req.body;
-
-        let story = await Story.findById(storyId);
-
-        const meLike = story.likes.find(o => o === req.user);
-
-        if (meLike) {
-            story.likes = lodash.filter(story.likes, x => x !== req.user);
-        } else {
-            story.likes.push(req.user);
-        }
-
-        story = await story.save();
-        res.json(story);
-    } catch (e) {
-        res.status(500).json({ error: e.message });
-    }
-});
-
-// comment story
-storyRouter.post("/add-comment", auth, async (req, res) => {
-    try {
-        const { storyId, comment } = req.body;
-
-        let story = await Story.findById(storyId);
-
-        story.comments.push({
-            userId: req.user,
-            comment,
-        });
-        story = await story.save();
-
-        res.json(story);
-
-    } catch (e) {
-        res.status(500).json({ error: e.message });
-    }
-});
-
-// get comment 
-storyRouter.get("/get-comment", async (req, res) => {
+// get story comments
+storyRouter.get("/get-story-comments", async (req, res) => {
     try {
         const story = await Story.findById(req.query.storyId);
         res.json(story.comments);
@@ -93,8 +68,8 @@ storyRouter.get("/get-comment", async (req, res) => {
     }
 });
 
-// like comment
-storyRouter.post("/like-comment", auth, async (req, res) => {
+// like comment story
+storyRouter.post("/like-comment-story", auth, async (req, res) => {
     try {
         const { storyId, commentId } = req.body;
 
@@ -116,7 +91,5 @@ storyRouter.post("/like-comment", auth, async (req, res) => {
         res.status(500).json({ error: e.message });
     }
 });
-
-
 
 module.exports = storyRouter;

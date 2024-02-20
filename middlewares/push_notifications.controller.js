@@ -8,8 +8,6 @@ var FCM = new fcm(certPath);
 
 exports.sendPushNotification = (req, res) => {
     try {
-        console.log('uuuuuuuuuuuuuu');
-        console.log(req.body.userId);
         const user =  User.findById(req.body.userId);
         let message = {
             notification: {

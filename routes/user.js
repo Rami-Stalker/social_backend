@@ -28,26 +28,29 @@ userRouter.get("/search/:name", async (req, res) => {
     }
 });
 
-userRouter.post("/follow-user", auth, async (req, res) => {
+userRouter.get("/get-followers", auth, async (req, res) => {
     try {
-        const { userId } = req.body;
-
-        let my = await User.findById(req.user);
-        let user = await User.findById(userId);
-
-        const friend = my.following.find(o => o === userId);
-
-        if (friend) {
-            my.following = lodash.filter(my.following, x => x !== user.id);
-            user.followers = lodash.filter(user.followers, x => x !== req.user);
-        } else {
-            my.following.push(userId);
-            user.followers.push(req.user);
+        let users = [];
+        const user = await User.findById(req.query.userId);
+        for (let i = 0; i < user.followers.length; i++) {
+            let use = await User.findById(user.followers[i]);
+            users.push(use);
         }
+        res.json(users);
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
 
-        user = await user.save();
-        my = await my.save();
-        res.json(my);
+userRouter.get("/get-following", auth, async (req, res) => {
+    try {
+        let users = [];
+        const user = await User.findById(req.query.userId);
+        for (let i = 0; i < user.following.length; i++) {
+            let use = await User.findById(user.following[i]);
+            users.push(use);
+        }
+        res.json(users);
     } catch (e) {
         res.status(500).json({ error: e.message });
     }
@@ -75,18 +78,30 @@ userRouter.post("/update-user-info", auth, async (req, res) => {
     try {
         const { name, bio, email, address, phone, photo, backgroundImage } = req.body;
 
-        let user = await User.findOneAndUpdate(req.user, {
-            name: name,
-            bio: bio,
-            email: email,
-            address: address,
-            phone: phone,
-            photo: photo,
-            backgroundImage: backgroundImage,
-        }).save();
+        let user = await User.findById(req.user);
+            user.name = name,
+            user.bio = bio,
+            user.email = email,
+            user.address = address,
+            user.phone = phone,
+            user.photo = photo,
+            user.backgroundImage = backgroundImage,
+
+        // let user = await User.findOneAndUpdate(req.user, {
+        //     name: name,
+        //     bio: bio,
+        //     email: email,
+        //     address: address,
+        //     phone: phone,
+        //     photo: photo,
+        //     backgroundImage: backgroundImage,
+        // });
+        user = await user.save();
+
         res.json(user);
     } catch (e) {
         res.status(500).json({ error: e.message });
+        console.log(e.message);
     }
 });
 
@@ -103,7 +118,7 @@ userRouter.post('/save-user-fcm-token', auth ,async (req, res) => {
     }
 });
 
-userRouter.put("/private", auth, async (req, res) => {
+userRouter.post("/private", auth, async (req, res) => {
 
     let user = await User.findById(req.user);
     if (user.private == false) {
